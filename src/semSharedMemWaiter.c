@@ -189,6 +189,7 @@ static void informChef ()
     }
 
     /* insert your code here */
+    semUp(semgid,WAITORDER);
 
     if (semUp (semgid, sh->mutex) == -1)                                                   /* exit critical region */
     { perror ("error on the down operation for semaphore access (WT)");
