@@ -177,7 +177,7 @@ static bool waitFriends(int id)
 
     if(sh->fSt.tableClients == TABLESIZE){
         sh->fSt.tableLast = id;
-        for(int i=1; i<TABLESIZE-1; i++) semUp(semgid,FRIENDSARRIVED); // fazer aqui ou fora do mutex??
+        for(int i=1; i<TABLESIZE; i++) semUp(semgid,FRIENDSARRIVED); // fazer aqui ou fora do mutex??
     }
 
     saveState(nFic,&sh->fSt); 
@@ -189,8 +189,7 @@ static bool waitFriends(int id)
 
     /* insert your code here */
 
-    semDown(semgid,FRIENDSARRIVED);
-    //if(sh->fSt.tableLast == id) 
+    if(sh->fSt.tableLast != id) semDown(semgid,FRIENDSARRIVED);
     //    for(int i=0; i<TABLESIZE; i++) semUp(semgid,FRIENDSARRIVED);
 
     return first;
@@ -216,6 +215,7 @@ static void orderFood (int id)
 
     /* insert your code here */
     sh->fSt.st.clientStat[id] = FOOD_REQUEST;
+    sh->fSt.foodRequest = 1;
     saveState(nFic,&sh->fSt); 
 
     if (semUp (semgid, sh->mutex) == -1)                                                      /* exit critical region */
@@ -295,7 +295,7 @@ static void waitAndPay (int id)
     sh->fSt.st.clientStat[id] = WAIT_FOR_OTHERS;
     sh->fSt.tableFinishEat++;
     if(sh->fSt.tableFinishEat == TABLESIZE){
-        for(int i=1; i<TABLESIZE-1; i++) semUp(semgid,ALLFINISHED);
+        for(int i=0; i<TABLESIZE; i++) semUp(semgid,ALLFINISHED);
     } 
     if(id == sh->fSt.tableLast) last = true;
     saveState(nFic,&sh->fSt); 
@@ -316,6 +316,7 @@ static void waitAndPay (int id)
 
         /* insert your code here */
         sh->fSt.st.clientStat[id] = WAIT_FOR_BILL;
+        sh->fSt.paymentRequest = 1;
         saveState(nFic,&sh->fSt); 
 
         if (semUp (semgid, sh->mutex) == -1) {                                                  /* enter critical region */
