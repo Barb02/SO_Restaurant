@@ -143,13 +143,16 @@ int main (int argc, char *argv[])
  */
 static int waitForClientOrChef()
 {
-    int ret=0; 
+    int ret=0;
+
     if (semDown (semgid, sh->mutex) == -1)  {                                                  /* enter critical region */
         perror ("error on the up operation for semaphore access (WT)");
         exit (EXIT_FAILURE);
     }
 
     /* insert your code here */
+    sh->fSt.st.waiterStat = WAIT_FOR_REQUEST;
+    saveState(nFic,&sh->fSt); 
     
     if (semUp (semgid, sh->mutex) == -1)      {                                             /* exit critical region */
         perror ("error on the down operation for semaphore access (WT)");
@@ -157,6 +160,7 @@ static int waitForClientOrChef()
     }
 
     /* insert your code here */
+    semDown(semgid,WAITERREQUEST);
 
     if (semDown (semgid, sh->mutex) == -1)  {                                                  /* enter critical region */
         perror ("error on the up operation for semaphore access (WT)");
@@ -164,9 +168,21 @@ static int waitForClientOrChef()
     }
 
     /* insert your code here */
+    if(sh->fSt.foodRequest){
+        ret = FOODREQ;
+        sh->fSt.foodRequest = 0;
+    }
+    else if(sh->fSt.foodReady){
+        ret = FOODREADY;
+        sh->fSt.foodReady = 0;
+    }
+    else if(sh->fSt.paymentRequest){
+        ret = BILL;
+        sh->fSt.paymentRequest = 0;
+    }
 
     if (semUp (semgid, sh->mutex) == -1) {                                                  /* exit critical region */
-     perror ("error on the down operation for semaphore access (WT)");
+        perror ("error on the down operation for semaphore access (WT)");
         exit (EXIT_FAILURE);
     }
 
@@ -189,7 +205,8 @@ static void informChef ()
     }
 
     /* insert your code here */
-    semUp(semgid,WAITORDER);
+    sh->fSt.st.waiterStat = INFORM_CHEF;
+    saveState(nFic,&sh->fSt);
 
     if (semUp (semgid, sh->mutex) == -1)                                                   /* exit critical region */
     { perror ("error on the down operation for semaphore access (WT)");
@@ -197,6 +214,8 @@ static void informChef ()
     }
 
     /* insert your code here */
+    semUp(semgid,REQUESTRECEIVED);
+    semUp(semgid,WAITORDER);
 }
 
 /**
@@ -213,7 +232,9 @@ static void takeFoodToTable ()
         exit (EXIT_FAILURE);
     }
 
-    /* insert your code here */
+    sh->fSt.st.waiterStat = TAKE_TO_TABLE;
+    saveState(nFic,&sh->fSt);
+    for(int i=0; i<TABLESIZE; i++) semUp(semgid,FOODARRIVED);
     
     if (semUp (semgid, sh->mutex) == -1)  {                                                  /* exit critical region */
      perror ("error on the down operation for semaphore access (WT)");
@@ -235,7 +256,9 @@ static void receivePayment ()
         exit (EXIT_FAILURE);
     }
 
-    /* insert your code here */
+    sh->fSt.st.waiterStat = RECEIVE_PAYMENT;
+    saveState(nFic,&sh->fSt);
+    semUp(semgid,REQUESTRECEIVED);
 
     if (semUp (semgid, sh->mutex) == -1)  {                                                  /* exit critical region */
      perror ("error on the down operation for semaphore access (WT)");
