@@ -177,7 +177,7 @@ static bool waitFriends(int id)
 
     if(sh->fSt.tableClients == TABLESIZE){
         sh->fSt.tableLast = id;
-        for(int i=1; i<TABLESIZE; i++) semUp(semgid,FRIENDSARRIVED); // fazer aqui ou fora do mutex??
+        for(int i=1; i<=TABLESIZE; i++) semUp(semgid,FRIENDSARRIVED); // fazer aqui ou fora do mutex??
     }
 
     saveState(nFic,&sh->fSt); 
@@ -293,7 +293,7 @@ static void waitAndPay (int id)
     sh->fSt.st.clientStat[id] = WAIT_FOR_OTHERS;
     sh->fSt.tableFinishEat++;
     if(sh->fSt.tableFinishEat == TABLESIZE){
-        for(int i=0; i<TABLESIZE; i++) semUp(semgid,ALLFINISHED);
+        for(int i=1; i<=TABLESIZE; i++) semUp(semgid,ALLFINISHED);
     } 
     if(id == sh->fSt.tableLast) last = true;
     saveState(nFic,&sh->fSt); 
