@@ -177,7 +177,7 @@ static bool waitFriends(int id)
 
     if(sh->fSt.tableClients == TABLESIZE){
         sh->fSt.tableLast = id;
-        for(int i=1; i<=TABLESIZE; i++) semUp(semgid,FRIENDSARRIVED); // fazer aqui ou fora do mutex??
+        for(int i=1; i<=TABLESIZE; i++) semUp(semgid,FRIENDSARRIVED);
     }
 
     saveState(nFic,&sh->fSt); 

@@ -232,6 +232,7 @@ static void takeFoodToTable ()
         exit (EXIT_FAILURE);
     }
 
+    /* insert your code here */
     sh->fSt.st.waiterStat = TAKE_TO_TABLE;
     saveState(nFic,&sh->fSt);
     for(int i=0; i<TABLESIZE; i++) semUp(semgid,FOODARRIVED);
@@ -256,6 +257,7 @@ static void receivePayment ()
         exit (EXIT_FAILURE);
     }
 
+    /* insert your code here */
     sh->fSt.st.waiterStat = RECEIVE_PAYMENT;
     saveState(nFic,&sh->fSt);
     semUp(semgid,REQUESTRECEIVED);
