@@ -139,17 +139,19 @@ int main (int argc, char *argv[])
  *  Waiter updates state and waits for request from client or from chef, then reads request.
  *  The internal state should be saved.
  *
- *  \return type of request (FOODREQ, FOODREADY, PAYREQ)
+ *  \return type of request (FOODREQ, FOODREADY, BILL)
  */
 static int waitForClientOrChef()
 {
-    int ret=0; 
+    int ret=0;
+
     if (semDown (semgid, sh->mutex) == -1)  {                                                  /* enter critical region */
         perror ("error on the up operation for semaphore access (WT)");
         exit (EXIT_FAILURE);
     }
 
     /* insert your code here */
+    sh->fSt.st.waiterStat = WAIT_FOR_REQUEST;
     
     if (semUp (semgid, sh->mutex) == -1)      {                                             /* exit critical region */
         perror ("error on the down operation for semaphore access (WT)");
@@ -157,6 +159,7 @@ static int waitForClientOrChef()
     }
 
     /* insert your code here */
+    semDown(semgid,WAITERREQUEST);
 
     if (semDown (semgid, sh->mutex) == -1)  {                                                  /* enter critical region */
         perror ("error on the up operation for semaphore access (WT)");
@@ -164,6 +167,18 @@ static int waitForClientOrChef()
     }
 
     /* insert your code here */
+    if(sh->fSt.foodRequest){
+        ret = FOODREQ;
+        sh->fSt.foodRequest = 0;
+    }  
+    else if(sh->fSt.foodReady){
+        ret = FOODREADY;
+        sh->fSt.foodReady = 0;
+    }
+    else if(sh->fSt.paymentRequest){
+        ret = BILL;
+        sh->fSt.paymentRequest = 0;
+    } 
 
     if (semUp (semgid, sh->mutex) == -1) {                                                  /* exit critical region */
      perror ("error on the down operation for semaphore access (WT)");
@@ -189,7 +204,6 @@ static void informChef ()
     }
 
     /* insert your code here */
-    semUp(semgid,WAITORDER);
 
     if (semUp (semgid, sh->mutex) == -1)                                                   /* exit critical region */
     { perror ("error on the down operation for semaphore access (WT)");
@@ -197,6 +211,7 @@ static void informChef ()
     }
 
     /* insert your code here */
+    semUp(semgid,WAITORDER);
 }
 
 /**
