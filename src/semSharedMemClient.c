@@ -188,7 +188,7 @@ static bool waitFriends(int id)
     }
 
     /* insert your code here */
-    if(sh->fSt.tableLast != id) semDown(semgid,FRIENDSARRIVED);
+    semDown(semgid,FRIENDSARRIVED);
 
     return first;
 }

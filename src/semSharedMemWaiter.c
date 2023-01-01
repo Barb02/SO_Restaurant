@@ -235,7 +235,7 @@ static void takeFoodToTable ()
     /* insert your code here */
     sh->fSt.st.waiterStat = TAKE_TO_TABLE;
     saveState(nFic,&sh->fSt);
-    for(int i=0; i<TABLESIZE; i++) semUp(semgid,FOODARRIVED);
+    for(int i=1; i<=TABLESIZE; i++) semUp(semgid,FOODARRIVED);
     
     if (semUp (semgid, sh->mutex) == -1)  {                                                  /* exit critical region */
      perror ("error on the down operation for semaphore access (WT)");
